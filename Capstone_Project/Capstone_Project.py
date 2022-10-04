@@ -41,11 +41,11 @@ def run_backtest(securityCode,data,strategyId,strategyName):
 
      # with Static Percentage Stop Loss
      if strategyName=="Supertrend+Stop Loss":
-        cerebro.addstrategy(sts.SuperTrendStrategy,printout=True,apply_stop_loss=True,stop_loss_type='static_percentage',stop_loss_percentage=0.05)
+        cerebro.addstrategy(sts.SuperTrendStrategy,printout=True,apply_stop_loss=True,stop_loss_type='static_percentage',stop_loss_percentage=0.02)
 
      # with Volatility Adjusted Stop Loss
      if strategyName=="Supertrend+Volatility Adjusted Stop Loss":
-        cerebro.addstrategy(sts.SuperTrendStrategy,printout=True,apply_stop_loss=True,stop_loss_type='volatility_adjusted',stop_loss_percentage=0.05)
+        cerebro.addstrategy(sts.SuperTrendStrategy,printout=True,apply_stop_loss=True,stop_loss_type='volatility_adjusted',stop_loss_percentage=0.02)
 
  
 
@@ -107,8 +107,6 @@ def run_backtest(securityCode,data,strategyId,strategyName):
         print("Sharpe Ratio      :%.3f" % sharpe_ratio) 
      
     
-     # Save results to db
-     #db.save_result(securityCode,strategyId,profit_rate,pnl_net,max_drawdown,sharpe_ratio,strike_rate,numberOfTrade)
      #Plotting
      cerebro.plot()
 
@@ -144,27 +142,27 @@ if __name__ == "__main__":
      securities=['QQQ']
      #Get all strategies
      strategies=[
-         #{
-         #   'StrategyName':'Supertrend',
-         #   'StrategyId':'Supertrend',
-         #   'TimeFrame':'During Pandemic(01 Jan 2019 - 13 Jul 2022)',
-         #   'StartDate':datetime.datetime(2019,1, 1),
-         #   'EndDate':datetime.datetime(2022,10, 2)
-         #}
-         #{
-         #   'StrategyName':'Supertrend+Stop Loss',
-         #   'StrategyId':'Supertrend+Stop Loss',
-         #   'TimeFrame':'During Pandemic(01 Jan 2019 - 13 Jul 2022)',
-         #   'StartDate':datetime.datetime(2019,1, 1),
-         #   'EndDate':datetime.datetime(2022,10, 2)
-         #},
-         #{
-         #   'StrategyName':'Supertrend+Volatility Adjusted Stop Loss',
-         #   'StrategyId':'Supertrend+Volatility Adjusted Stop Loss',
-         #   'TimeFrame':'During Pandemic(01 Jan 2019 - 13 Jul 2022)',
-         #   'StartDate':datetime.datetime(2019,1, 1),
-         #   'EndDate':datetime.datetime(2022,10, 2)
-         #},
+         {
+            'StrategyName':'Supertrend',
+            'StrategyId':'Supertrend',
+            'TimeFrame':'During Pandemic(01 Jan 2019 - 13 Jul 2022)',
+            'StartDate':datetime.datetime(2019,1, 1),
+            'EndDate':datetime.datetime(2022,10, 2)
+         },
+         {
+            'StrategyName':'Supertrend+Stop Loss',
+            'StrategyId':'Supertrend+Stop Loss',
+            'TimeFrame':'During Pandemic(01 Jan 2019 - 13 Jul 2022)',
+            'StartDate':datetime.datetime(2019,1, 1),
+            'EndDate':datetime.datetime(2022,10, 2)
+         },
+         {
+            'StrategyName':'Supertrend+Volatility Adjusted Stop Loss',
+            'StrategyId':'Supertrend+Volatility Adjusted Stop Loss',
+            'TimeFrame':'During Pandemic(01 Jan 2019 - 13 Jul 2022)',
+            'StartDate':datetime.datetime(2019,1, 1),
+            'EndDate':datetime.datetime(2022,10, 2)
+         },
           {
             'StrategyName':'Supertrend+HE',
             'StrategyId':'Supertrend+HE',
