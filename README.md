@@ -1,34 +1,23 @@
-# MSCFE 690 - Capstone Project - Risk Management in Short Term Mean-Reverting Trading
+# MSCFE 690 - Capstone Project - Usage of the Hurst Exponent for Short Term Trading Strategies
 
-In a mean reverting strategy, it is assumed that prices of a security will revert 
-towards to mean after a big drop or big increase on prices of the security. The main problem 
-on this assumption is that price return of a security mostly is not stationary and not normally 
-distributed, so it will hard to find out when the price of an asset will return to the mean. 
-Moreover, those unexpected moves in price can also lead to a shift in its normal or mean.
-
-Therefore, in this project I will try creating a concept about what kind of risk 
-mitigation techniques can be used to avoid big losses while applying mean-reverting trading 
-strategies. I will implement mean-reverting strategies with risk management techniques, 
-then I will backtest those strategies with ETFs historical data.
-
-Each ETF was backtested by using RSI signals according to below criteria:
-- without any risk management technique
-- with static percentage stop loss
-- with volatility adjusted percentage stop loss
-- with time based stop
-- with volatility adjusted position resizing 
+The goal of this research paper is to build trend following strategies for intraday
+trading by using the Hurst Exponent and combining it with technical indicators such as
+the SuperTrend or MACD indicators. First, we attempt to minimize the white noise effect
+of the Hurst Exponent. Going further, we will use the Hurst Exponent to identify trending
+and mean-reverting time series, based on this we will use the signals of the SuperTrend
+indicator to enter into position. We will use backtader.py for back testing on Index ETFs
+such as SPY, QQQ and IWM, on 1, 3 and 5 minute timeframes.
 
 ### 1. Solution
-![General Architecture of Project](https://github.com/hasancakir92/Capstone_Project/blob/master/General%20Architecture.jpg)
+![General Architecture of Project](https://github.com/hasancakir92/Capstone/blob/master/General%20Architecture.jpg)
 ### 2. Code Structure
 
     .
     ├── Data                                         # Folder - Services related with data transactions
     │   ├── AmeriTradeHistoryDataService.py          # Download historical price data for a security by using AmeriTrade API
-    │   ├── BacktestResultDB.py                      # Manage database transaction to save backtest result for further analysis
     ├── Strategies                                   # Folder - Strategies for backtesting
     │   ├── BaseStrategy.py                          # Generic abstract base class that can be interface for different strategies.
-    │   ├── RSIStrategy.py                           # Implementation of RSI strategy derived from BaseStrategy
+    │   ├── SuperTrendStrategy.py                    # Implementation of Supertrend strategy derived from BaseStrategy
     ├── Capstone_Project.py                          # Implementation of backtesting process
     └── README.md
 #### Data Folder
@@ -39,29 +28,12 @@ AmeriTrade api key should be entered in Capstone_Project.py file. You need to re
 #ameritrade api key
 ameriTradeApiKey=""
 ```
-In order to save backtest result for each ETF and strategy, a method under BacktestResultDB.py was develop. Moreover, two more functions was developed to read all ETFs and strategies that will be backtested from database. MSSQL SQL Express([Download](https://www.microsoft.com/en-US/sql-server/sql-server-downloads), [Installation](https://www.sqlshack.com/how-to-install-sql-server-express-edition/)) is used as database in this project. Then, connection string should be changed in BacktestResultDB.py file.
-
-```
-#connection string to connect db
-conn = pyodbc.connect('')
-```
-
 #### Strategies Folder
 Firstly, a base strategy class(BaseStrategy.py) was implemented to give generic approach for any strategy. Any strategy derived from this class will have below methods:
  - To notify about order situation
  - To printout any log
  - To notify about trade situation when a trade is closed or open.
  - To apply stop loss(static percentage or volatility adjusted) for any strategy
- - To apply time based stop loss
- - To apply position sizing based on volatility
  
- Secondly, a strategy class(RSIStrategy.py) was derived from BaseStrategy. It includes buy and signal logic based on RSI indicator.
+ Secondly, a strategy class(SuperTrendStrategy.py) was derived from BaseStrategy. It includes buy and signal logic based on Supertrend indicator and Hurst Exponent.
  
-    ### For more details, comments in source code can be checked. ###
-### 3. Database
-In database, we have three tables:
-1. Security: it keeps the all ETFs' symbol and description. Any securities inside this table will be backtested.
-2. Strategy : it keeps strategies that will be backtested and their setup information like time frequency, start and end date of historical data.
-3. StrategyResult: it keeps all backtest result like profit rate, PnL, Max Drawdown, Sharpe Ratio and Number of Trade processed for each ETF and strategy. 
-
-[CapstoneProject.sql](https://github.com/hasancakir92/Capstone_Project/blob/master/CapstoneProject.sql) file includes all table schemas about the database. Moreover, insertion script for ETFs and strategies can be found inside it.
