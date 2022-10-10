@@ -30,9 +30,15 @@ class SuperTrendStrategy(bs.BaseStrategy):
         #Check if stop loss is/will be applied
         if self.stop_loss():
             return;
-        
-        buy_condition=self.st < self.data
-        sell_condition =self.data < self.st
+        #if white noise reduction will be applied,we will use filtered data for buy/sell signal
+        if self.p.apply_noise_reduction:
+            buy_condition=self.st < self.data1
+            sell_condition =self.data1 < self.st
+        #if white noise reduction will not be applied,we will use original data for buy/sell signal
+        else:
+            buy_condition=self.st < self.data
+            sell_condition =self.data < self.st
+
         if self.p.apply_hurst_exponent:
             if self.hr<0.5:
                 buy_condition=False

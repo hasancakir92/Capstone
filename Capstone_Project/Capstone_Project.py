@@ -34,7 +34,7 @@ def run_backtest(securityCode,data,filtered_data,strategyId,strategyName):
      
      # Without Risk Management
      if strategyName=="Supertrend":
-        cerebro.addstrategy(sts.SuperTrendStrategy,printout=True,apply_noise_reduction=False)
+        cerebro.addstrategy(sts.SuperTrendStrategy,printout=True,apply_noise_reduction=True)
         
      # With HE
      if strategyName=="Supertrend+HE":
