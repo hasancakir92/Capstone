@@ -8,14 +8,19 @@ class SuperTrendStrategy(bs.BaseStrategy):
         ('period', 10),
         ('multiplier', 3),
         ('apply_hurst_exponent',False),
-        ('hurst_exponent_lag',20)
+        ('hurst_exponent_lag',20),
+        ('apply_noise_reduction',False)
     )
 
     def __init__(self):
         # To control operation entries
         self.orderid = None
-        self.hr = btind.HurstExponent(period=self.p.hurst_exponent_lag)
-        self.st = SuperTrend(period = self.p.period, multiplier = self.p.multiplier)
+        if self.p.apply_noise_reduction:
+            self.hr = btind.HurstExponent(self.data1,period=self.p.hurst_exponent_lag)
+            self.st = SuperTrend(self.data1,period = self.p.period, multiplier = self.p.multiplier)
+        else:
+            self.hr = btind.HurstExponent(period=self.p.hurst_exponent_lag)
+            self.st = SuperTrend(period = self.p.period, multiplier = self.p.multiplier)
         super().__init__()
    
     def next(self):

@@ -12,7 +12,7 @@ import sys
 #ameritrade api key
 ameriTradeApiKey="7BNQRFGNAKJL5XFOAGZE2LIUSWFJGE5G"
 
-def run_backtest(securityCode,data,strategyId,strategyName):
+def run_backtest(securityCode,data,filtered_data,strategyId,strategyName):
      """
         Runs backtrader engine to process backtest
 
@@ -34,7 +34,7 @@ def run_backtest(securityCode,data,strategyId,strategyName):
      
      # Without Risk Management
      if strategyName=="Supertrend":
-        cerebro.addstrategy(sts.SuperTrendStrategy,printout=True)
+        cerebro.addstrategy(sts.SuperTrendStrategy,printout=True,apply_noise_reduction=False)
         
      # With HE
      if strategyName=="Supertrend+HE":
@@ -63,6 +63,10 @@ def run_backtest(securityCode,data,strategyId,strategyName):
      #Feed strategy with data
      backtestData= bt.feeds.PandasData(dataname=data)
      cerebro.adddata(backtestData)
+
+     #Feed strategy with filtered data
+     filteredData= bt.feeds.PandasData(dataname=filtered_data)
+     cerebro.adddata(filteredData)
 
      #Get initial portfolip value
      initial_portfolio_value=cerebro.broker.getvalue();
@@ -137,7 +141,7 @@ def apply_backtest_for_security(securityCode,strategyId,strategyName,startDate,e
          return
     filtered_data = kf(data)
     #Run backtest
-    run_backtest(securityCode,filtered_data,strategyId,strategyName)
+    run_backtest(securityCode,data,filtered_data,strategyId,strategyName)
 
 
 if __name__ == "__main__":
