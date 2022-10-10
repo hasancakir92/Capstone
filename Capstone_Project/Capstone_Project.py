@@ -2,10 +2,12 @@ from pickle import FALSE
 import backtrader as bt
 
 from Data.AmeriTradeHistoryDataService import AmeriTradeHistoryDataService
+from NoiseReduction.KalmanFiltering import KalmanFiltering as kf
 from Strategies import SuperTrendStrategy as sts
 import backtrader.analyzers as btanalyzers
 import datetime
 import sys
+
 
 #ameritrade api key
 ameriTradeApiKey="7BNQRFGNAKJL5XFOAGZE2LIUSWFJGE5G"
@@ -133,8 +135,9 @@ def apply_backtest_for_security(securityCode,strategyId,strategyName,startDate,e
     except:
          print("Historical data can not be downloaded!")
          return
+    filtered_data = kf(data)
     #Run backtest
-    run_backtest(securityCode,data,strategyId,strategyName)
+    run_backtest(securityCode,filtered_data,strategyId,strategyName)
 
 
 if __name__ == "__main__":

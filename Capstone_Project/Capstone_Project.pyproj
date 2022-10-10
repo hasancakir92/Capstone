@@ -25,12 +25,14 @@
     <Compile Include="Data\AmeriTradeHistoryDataService.py" />
     <Compile Include="Data\HistoricalDataDownload.py" />
     <Compile Include="Indicator\SuperTrendIndicator.py" />
+    <Compile Include="NoiseReduction\KalmanFiltering.py" />
     <Compile Include="Strategies\BaseStrategy.py" />
     <Compile Include="Strategies\SuperTrendStrategy.py" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Data\" />
     <Folder Include="Indicator\" />
+    <Folder Include="NoiseReduction\" />
     <Folder Include="Strategies\" />
   </ItemGroup>
   <ItemGroup>
