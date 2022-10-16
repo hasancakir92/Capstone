@@ -39,6 +39,7 @@ class SuperTrendStrategy(bs.BaseStrategy):
             buy_condition=self.st < self.data
             sell_condition =self.data < self.st
 
+        #if we apply HE
         if self.p.apply_hurst_exponent:
             if self.hr<0.5:
                 buy_condition=False
@@ -46,8 +47,10 @@ class SuperTrendStrategy(bs.BaseStrategy):
        
         if self.position.size:
              if sell_condition:
+                #Sell with original price
                 self.sell(size=self.position.size)
       
         elif buy_condition:
+            #buy with original price
             size = int(self.broker.get_cash() / self.data)
             self.buy(size=size)

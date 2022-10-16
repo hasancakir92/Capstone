@@ -37,15 +37,15 @@ def DowloadHistoricalData(startDate, endDate,securityCode,minute):
             print("Historical data can not be downloaded!")
     # save as csv
     finaldata.to_csv(f"{securityCode}.csv",index="Date")  
-
+    #return finaldata
 #1 minute data can be just downloaded starting from 2022-9-1
 #3 minute data can not be downloaded
 #5 minute data can be just downloaded starting from 2022-2-1
 #60 minute data can be just downloaded starting from 2021-6-1
 
 securityCode="QQQ"
-startDate=datetime.datetime(2021,6,1,4,0,0)
-endDate=datetime.datetime(2022,10,8,4,0,0)
+startDate=datetime.datetime(2021,5,1,4,0,0)
+endDate=datetime.datetime(2022,10,13,4,0,0)
 DowloadHistoricalData(startDate,endDate,securityCode,60)
 
    

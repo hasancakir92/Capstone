@@ -26,17 +26,24 @@
     <Compile Include="Data\HistoricalDataDownload.py" />
     <Compile Include="Indicator\SuperTrendIndicator.py" />
     <Compile Include="NoiseReduction\KalmanFiltering.py" />
+    <Compile Include="Research\SuperTrendIndicator.py" />
     <Compile Include="Strategies\BaseStrategy.py" />
     <Compile Include="Strategies\SuperTrendStrategy.py" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Data\" />
     <Folder Include="Indicator\" />
+    <Folder Include="Research\" />
     <Folder Include="NoiseReduction\" />
     <Folder Include="Strategies\" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="requirements.txt" />
+    <Content Include="Research\60 DATA.xlsx" />
+    <Content Include="Research\Capstone test.ipynb" />
+    <Content Include="Research\README.md" />
+    <Content Include="Research\White Noise Reduction Research.ipynb" />
+    <Content Include="Research\White Noise Reduction Techniques.ipynb" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets" />
   <!-- Uncomment the CoreCompile target to enable the Build command in

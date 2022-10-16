@@ -1,6 +1,6 @@
 from pickle import FALSE
 import backtrader as bt
-
+import pandas as pd
 from Data.AmeriTradeHistoryDataService import AmeriTradeHistoryDataService
 from NoiseReduction.KalmanFiltering import KalmanFiltering as kf
 from Strategies import SuperTrendStrategy as sts
@@ -31,23 +31,19 @@ def run_backtest(securityCode,data,filtered_data,strategyId,strategyName):
 
      #Backtesting engine
      cerebro = bt.Cerebro()
-     
-     # Without Risk Management
+        
+     # With HE
      if strategyName=="Supertrend":
-        cerebro.addstrategy(sts.SuperTrendStrategy,printout=True,apply_noise_reduction=True)
+        cerebro.addstrategy(sts.SuperTrendStrategy,printout=True,apply_hurst_exponent=False,apply_noise_reduction=False)
+     
         
      # With HE
      if strategyName=="Supertrend+HE":
-        cerebro.addstrategy(sts.SuperTrendStrategy,printout=True,apply_hurst_exponent=True)
+        cerebro.addstrategy(sts.SuperTrendStrategy,printout=True,apply_hurst_exponent=True,apply_noise_reduction=False)
      
-
-     # with Static Percentage Stop Loss
-     if strategyName=="Supertrend+Stop Loss":
-        cerebro.addstrategy(sts.SuperTrendStrategy,printout=True,apply_stop_loss=True,stop_loss_type='static_percentage',stop_loss_percentage=0.02)
-
-     # with Volatility Adjusted Stop Loss
-     if strategyName=="Supertrend+Volatility Adjusted Stop Loss":
-        cerebro.addstrategy(sts.SuperTrendStrategy,printout=True,apply_stop_loss=True,stop_loss_type='volatility_adjusted',stop_loss_percentage=0.02)
+     # with HE, noise reduction and  Volatility Adjusted Stop Loss
+     if strategyName=="Supertrend+HE+Noise Reduction+Volatility Adjusted Stop Loss":
+        cerebro.addstrategy(sts.SuperTrendStrategy,printout=True,apply_hurst_exponent=True,apply_noise_reduction=True,apply_stop_loss=True,stop_loss_type='volatility_adjusted',stop_loss_percentage=0.04)
 
  
 
@@ -59,7 +55,8 @@ def run_backtest(securityCode,data,filtered_data,strategyId,strategyName):
 
      #set initial cask
      cerebro.broker.setcash(100000)
-    
+     cerebro.broker.setcommission(commission=0.001,commtype="COMM_FIXED")
+
      #Feed strategy with data
      backtestData= bt.feeds.PandasData(dataname=data)
      cerebro.adddata(backtestData)
@@ -116,7 +113,7 @@ def run_backtest(securityCode,data,filtered_data,strategyId,strategyName):
      #Plotting
      cerebro.plot()
 
-def apply_backtest_for_security(securityCode,strategyId,strategyName,startDate,endDate):
+def apply_backtest_for_security(securityCode,strategyId,strategyName,startDate,endDate,frequency):
     """
         To apply backtess for a security
         Paramaters:
@@ -132,13 +129,17 @@ def apply_backtest_for_security(securityCode,strategyId,strategyName,startDate,e
         endDate:datetime
             end date of historical data need to be downloaded
     """
-    try:
+    #try:
         #Download historical data
+    if frequency == "Daily":
         HistoricalDataService = AmeriTradeHistoryDataService(ameriTradeApiKey) 
         data = HistoricalDataService.GetHistoricalData(securityCode,"daily",1,startDate=startDate,endDate=endDate,periodType="year")
-    except:
-         print("Historical data can not be downloaded!")
-         return
+    elif frequency == "Hourly":
+        HistoricalDataService = AmeriTradeHistoryDataService(ameriTradeApiKey)
+        data = HistoricalDataService.GetHistoricalData(securityCode,"minute",60,startDate=startDate,endDate=endDate,periodType="day")
+    #except:
+    #     print("Historical data can not be downloaded!")
+    #     return
     filtered_data = kf(data)
     #Run backtest
     run_backtest(securityCode,data,filtered_data,strategyId,strategyName)
@@ -150,34 +151,32 @@ if __name__ == "__main__":
      #Get all strategies
      strategies=[
          {
+             # Strategy 1 and 2
+            'StrategyName':'Supertrend+HE',
+            'StrategyId':'Supertrend+HE',
+            'TimeFrame':'Since 2022-1-1',
+            'StartDate':datetime.datetime(2019,1, 1),
+            'EndDate':datetime.datetime(2022,10, 10),
+            'Frequency':'Hourly'
+         },
+         {
+             #Strategy 3
             'StrategyName':'Supertrend',
             'StrategyId':'Supertrend',
             'TimeFrame':'During Pandemic(01 Jan 2019 - 13 Jul 2022)',
             'StartDate':datetime.datetime(2019,1, 1),
-            'EndDate':datetime.datetime(2022,10, 2)
+            'EndDate':datetime.datetime(2022,10, 13),
+            'Frequency':'Daily'
          },
          {
-            'StrategyName':'Supertrend+Stop Loss',
-            'StrategyId':'Supertrend+Stop Loss',
+             #Strategy 4
+            'StrategyName':'Supertrend+HE+Noise Reduction+Volatility Adjusted Stop Loss',
+            'StrategyId':'Supertrend+HE+Noise Reduction+Volatility Adjusted Stop Loss',
             'TimeFrame':'During Pandemic(01 Jan 2019 - 13 Jul 2022)',
             'StartDate':datetime.datetime(2019,1, 1),
-            'EndDate':datetime.datetime(2022,10, 2)
-         },
-         {
-            'StrategyName':'Supertrend+Volatility Adjusted Stop Loss',
-            'StrategyId':'Supertrend+Volatility Adjusted Stop Loss',
-            'TimeFrame':'During Pandemic(01 Jan 2019 - 13 Jul 2022)',
-            'StartDate':datetime.datetime(2019,1, 1),
-            'EndDate':datetime.datetime(2022,10, 2)
-         },
-          {
-            'StrategyName':'Supertrend+HE',
-            'StrategyId':'Supertrend+HE',
-            'TimeFrame':'During Pandemic(01 Jan 2019 - 13 Jul 2022)',
-            'StartDate':datetime.datetime(2019,1, 1),
-            'EndDate':datetime.datetime(2022,10, 2)
+            'EndDate':datetime.datetime(2022,10, 13),
+            'Frequency':'Daily'
          }
-         
      ]
      
      #iterate all securities
@@ -191,7 +190,8 @@ if __name__ == "__main__":
             timeFrame=strategy["TimeFrame"]
             dateStartDate=strategy["StartDate"]
             dateEndDate=strategy["EndDate"]
+            frequency=strategy["Frequency"]
             print(f'====>{strategyName} for {timeFrame} in on process!')
             #apply backtest for a current security and strategy
-            apply_backtest_for_security(securityCode,strategyId,strategyName,dateStartDate,dateEndDate)
+            apply_backtest_for_security(securityCode,strategyId,strategyName,dateStartDate,dateEndDate,frequency)
   
