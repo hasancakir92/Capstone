@@ -1,3 +1,5 @@
+from ast import Lambda
+import pandas as pd
 from pickle import FALSE
 import backtrader as bt
 import pandas as pd
@@ -7,12 +9,12 @@ from Strategies import SuperTrendStrategy as sts
 import backtrader.analyzers as btanalyzers
 import datetime
 import sys
-
+from itertools import combinations
 
 #ameritrade api key
 ameriTradeApiKey="7BNQRFGNAKJL5XFOAGZE2LIUSWFJGE5G"
 
-def run_backtest(securityCode,data,filtered_data,strategyId,strategyName):
+def run_backtest(securityCode,data,filtered_data,combination):
      """
         Runs backtrader engine to process backtest
 
@@ -31,21 +33,24 @@ def run_backtest(securityCode,data,filtered_data,strategyId,strategyName):
 
      #Backtesting engine
      cerebro = bt.Cerebro()
-        
-     # With HE
-     if strategyName=="Supertrend":
-        cerebro.addstrategy(sts.SuperTrendStrategy,printout=True,apply_hurst_exponent=False,apply_noise_reduction=False)
-     
-        
-     # With HE
-     if strategyName=="Supertrend+HE":
-        cerebro.addstrategy(sts.SuperTrendStrategy,printout=True,apply_hurst_exponent=True,apply_noise_reduction=False)
-     
-     # with HE, noise reduction and  Volatility Adjusted Stop Loss
-     if strategyName=="Supertrend+HE+Noise Reduction+Volatility Adjusted Stop Loss":
-        cerebro.addstrategy(sts.SuperTrendStrategy,printout=True,apply_hurst_exponent=True,apply_noise_reduction=True,apply_stop_loss=True,stop_loss_type='volatility_adjusted',stop_loss_percentage=0.04)
+     apply_hurst_exponent=True if 'HE' in combination else False
+     apply_stop_loss=True if 'Stop Loss' in combination else False
+     apply_volatility_adjusted=True if 'Volatility Adjusted Stop Loss' in combination else False
+     apply_noise_reduction=True if 'Noise Reduction' in combination else False
+     print("============================================================================")
+     print(f'Hurst Exponent: {apply_hurst_exponent}')
+     print(f'Stop Loss:      {apply_stop_loss}')
+     print(f'Noise Reduction:{apply_noise_reduction}')
+     print(f'VA Stop Loss:   {apply_volatility_adjusted}')
 
- 
+     if apply_volatility_adjusted:
+        cerebro.addstrategy(sts.SuperTrendStrategy,printout=True,apply_hurst_exponent=apply_hurst_exponent,apply_noise_reduction=apply_noise_reduction,apply_stop_loss=True,stop_loss_type='volatility_adjusted',stop_loss_percentage=0.04)
+     elif apply_stop_loss:
+        cerebro.addstrategy(sts.SuperTrendStrategy,printout=True,apply_hurst_exponent=apply_hurst_exponent,apply_noise_reduction=apply_noise_reduction,apply_stop_loss=True,stop_loss_type='static_percentage',stop_loss_percentage=0.04)
+     else:
+        cerebro.addstrategy(sts.SuperTrendStrategy,printout=True,apply_hurst_exponent=apply_hurst_exponent,apply_noise_reduction=apply_noise_reduction)
+   
+        
 
      #Add analyzers to analyze backtest results
      cerebro.addanalyzer(btanalyzers.SharpeRatio, _name='sharpe')
@@ -109,11 +114,12 @@ def run_backtest(securityCode,data,filtered_data,strategyId,strategyName):
         sharpe_ratio=thestrat.analyzers.sharpe.get_analysis()['sharperatio']
         print("Sharpe Ratio      :%.3f" % sharpe_ratio) 
      
-    
+     print("============================================================================")
      #Plotting
      cerebro.plot()
+     return [apply_hurst_exponent,apply_noise_reduction,apply_stop_loss,apply_volatility_adjusted, numberOfTrade,profit_rate,strike_rate,pnl_net,max_drawdown,sharpe_ratio]
 
-def apply_backtest_for_security(securityCode,strategyId,strategyName,startDate,endDate,frequency):
+def apply_backtest_for_security(securityCode,startDate,endDate,frequency,combination):
     """
         To apply backtess for a security
         Paramaters:
@@ -142,22 +148,34 @@ def apply_backtest_for_security(securityCode,strategyId,strategyName,startDate,e
     #     return
     filtered_data = kf(data)
     #Run backtest
-    run_backtest(securityCode,data,filtered_data,strategyId,strategyName)
+    return run_backtest(securityCode,data,filtered_data,combination)
 
 
 if __name__ == "__main__":
+     #all conditions
+     conditions=['HE','Stop Loss','Noise Reduction','Volatility Adjusted Stop Loss']
+
+     #all combination of conditions
+     condition_combinations=list()
+     for n in range(len(conditions)+1):
+         combination=list(combinations(conditions,n))
+         condition_combinations+= combination
+     #make sure Stop loss and Volatility Adjusted Stop Loss will not applied same time
+     condition_combinations=list(filter(lambda c:not ('Stop Loss' in c and 'Volatility Adjusted Stop Loss' in c),condition_combinations))
+     condition_combinations=[[]]
+     #print(condition_combinations)
+    
      #Get all securities(ETFs)
-     securities=['QQQ']
+     securities=['SPY','QQQ']
      #Get all strategies
-     strategies=[
+     '''strategies=[
          {
-             # Strategy 1 and 2
-            'StrategyName':'Supertrend+HE',
-            'StrategyId':'Supertrend+HE',
-            'TimeFrame':'Since 2022-1-1',
+            'TimeFrame':'Since 2019-1-1',
             'StartDate':datetime.datetime(2019,1, 1),
             'EndDate':datetime.datetime(2022,10, 10),
-            'Frequency':'Hourly'
+            'Frequency':'Hourly',
+            'Apply'
+
          },
          {
              #Strategy 3
@@ -177,21 +195,24 @@ if __name__ == "__main__":
             'EndDate':datetime.datetime(2022,10, 13),
             'Frequency':'Daily'
          }
-     ]
-     
+     ]'''
+     dateStartDate=datetime.datetime(2019,1, 1)
+     dateEndDate=datetime.datetime(2022,10, 10)
+     frequency='Hourly'
+     all_results=[]
      #iterate all securities
      for security in securities:
         securityCode=security
-        print(f'==>{securityCode}')
-        #iterate all strategies
-        for strategy in strategies:
-            strategyName=strategy["StrategyName"]
-            strategyId=strategy["StrategyId"]
-            timeFrame=strategy["TimeFrame"]
-            dateStartDate=strategy["StartDate"]
-            dateEndDate=strategy["EndDate"]
-            frequency=strategy["Frequency"]
-            print(f'====>{strategyName} for {timeFrame} in on process!')
+        print(f'**************{securityCode}****************')
+        print(f'Start Date:     {dateStartDate}')
+        print(f'End Date:       {dateEndDate}')
+        print(f'Frequency:      {frequency}')
+        #iterate all combinations
+        for combination in condition_combinations:
             #apply backtest for a current security and strategy
-            apply_backtest_for_security(securityCode,strategyId,strategyName,dateStartDate,dateEndDate,frequency)
-  
+            result=apply_backtest_for_security(securityCode,dateStartDate,dateEndDate,frequency,combination)
+            all_results.append(result)
+     df = pd.DataFrame(all_results, columns =['HE','Noise Reduction','Stop Loss','VA Stop Loss', '# of Trade','Profit Rate','Strike Rate','PnL','Max Drawdown','Sharpe Ratio'], dtype = float)
+     df.to_csv(f"{frequency}.csv",index="Date")  
+    
+ 

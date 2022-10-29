@@ -4,13 +4,14 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>7ecfe560-f7b5-40b8-9e80-bcde2f0bb30d</ProjectGuid>
     <ProjectHome>.</ProjectHome>
-    <StartupFile>Capstone_Project.py</StartupFile>
+    <StartupFile>ly</StartupFile>
     <SearchPath>
     </SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
     <OutputPath>.</OutputPath>
     <Name>Capstone_Project</Name>
     <RootNamespace>Capstone_Project</RootNamespace>
+    <IsWindowsApplication>False</IsWindowsApplication>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
     <DebugSymbols>true</DebugSymbols>
@@ -44,6 +45,7 @@
     <Content Include="Research\README.md" />
     <Content Include="Research\White Noise Reduction Research.ipynb" />
     <Content Include="Research\White Noise Reduction Techniques.ipynb" />
+    <Content Include="trades.txt" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets" />
   <!-- Uncomment the CoreCompile target to enable the Build command in
